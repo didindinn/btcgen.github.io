@@ -10,15 +10,73 @@
         <script src="addressGen.js"></script>
         <script src="elliptic.js"></script>
         <script src="wordGen.js"></script>
+        <script src="qrcode.js"></script>
+        <script src="createQR.js"></script>
         <script>
-        window.onload=function(){
-            var pub=document.createElement("div");
-            pub.innerHTML="public address:"+(getPublicAddress( BigInt("0x18e14a7b6a307f426a94f8114701e7c8e774e7f9a47e2c2035db29a206321725")));
-            document.body.appendChild(pub);
-        };
+            var pubcanvas;
+            var privcanvas;
+            /*
+            window.onload=function(){
+                var pub=document.createElement("div");
+                var priv=document.createElement("div");
+                //let privateKey=BigInt("0x18e14a7b6a307f426a94f8114701e7c8e774e7f9a47e2c2035db29a206321725");
+                let privateKey=BigInt("0x0C28FCA386C7A227600B2FE50B7CAE11EC86D3BF1FBE471BE89827E19D72AA1D");
+                pub.innerHTML="public address:"+(getPublicAddress( privateKey));
+                priv.innerHTML="wif:"+getWif(privateKey);
+                document.body.appendChild(pub);
+                document.body.appendChild(priv);
+            };*/
+            function clk(){
+                if(pubcanvas){
+                    document.getElementById("privarea").removeChild(privcanvas);
+                    document.getElementById("pubarea").removeChild(pubcanvas);
+                }
+                console.log("click");
+                var pub=document.createElement("div");
+                var priv=document.createElement("div");
+                //let privateKey=BigInt("0x18e14a7b6a307f426a94f8114701e7c8e774e7f9a47e2c2035db29a206321725");
+                var checkbox=document.getElementById("mask");
+                //let privateKey=BigInt("0x0C28FCA386C7A227600B2FE50B7CAE11EC86D3BF1FBE471BE89827E19D72AA1D");
+                let privateKey=BigInt(document.getElementById("privkey").value);
+                if(checkbox.checked){
+                    privateKey^=BigInt(Math.floor(Math.random()*2**32));
+                    privateKey^=BigInt(Math.floor(Math.random()*2**64));
+                    privateKey^=BigInt(Math.floor(Math.random()*2**96));
+                    privateKey^=BigInt(Math.floor(Math.random()*2**128));
+                    privateKey^=BigInt(Math.floor(Math.random()*2**160));
+                    privateKey^=BigInt(Math.floor(Math.random()*2**192));
+                    privateKey^=BigInt(Math.floor(Math.random()*2**224));
+                    privateKey^=BigInt(Math.floor(Math.random()*2**256));
+                }
+
+                let address=getPublicAddress(privateKey);  pubcanvas=create_qrcode(address,4,QRCode.ErrorCorrectLevel.H,8);
+                document.getElementById("pubarea").appendChild(pubcanvas);
+                document.getElementById("address").innerHTML="address:"+address;
+
+                let wif=getWif(privateKey);
+
+                document.getElementById("wif").innerHTML="wif:"+wif;  privcanvas=create_qrcode(wif,4,QRCode.ErrorCorrectLevel.H,8);
+                document.getElementById("privarea").appendChild(privcanvas);
+                document.getElementById("privkeyprev").innerHTML="privateKey:"+privateKey.toString(16);
+                
+            }
         </script>
     </head>
     <body>
+        <div style="background:lightgreen;">
+            <button onclick="clk()">generate wif and keys</button>
+            private Key<input id="privkey" /><br>
+            mask with random<input type="checkbox" id="mask" /><br>
+        </div>
+        <div id="pubarea">
+            <h1>Address</h1>
+            <p id="address"></p>
+        </div>
+        <div id="privarea">
+            <h1>Private Key</h1>
+            <p id="wif"></p>
+            <p id="privkeyprev"></p>
+        </div>
     </body>
 
 </html>

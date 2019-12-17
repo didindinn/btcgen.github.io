@@ -4,7 +4,8 @@ function getPublicAddress(privkey/*BigInt*/){
     let pk = privkey;
     //hash160 = ripemd160(sha256((SPEC256k1 * pk).toBytes()));
     let publicKey=SPEC256k1.mul(pk).x;//+((0x02n))*(2n**256n);
-    let pubKeyStr="02"+publicKey.toString(16);
+    console.log("len:"+publicKey.toString(16).length);
+    let pubKeyStr="02"+pad(publicKey,64);
     console.log(pubKeyStr);
     //console.log(privkey.toString(16));
     
@@ -37,8 +38,26 @@ function getPublicAddress(privkey/*BigInt*/){
 }
 
 function getWif(privkey/*BigInt*/){
-    let wif=(BigInt(0x80)<<8n)|(privkey);
+    let num="80"+pad(privkey,64);
+    console.log("num:"+num);
+    let shashastr=CryptoJS.SHA256( CryptoJS.SHA256(CryptoJS.enc.Hex.parse(num))).toString(CryptoJS.enc.Hex);
+    console.log(shashastr);
+    let checksum=shashastr.substring(0,8);
+    console.log("checksum:"+checksum);  
+    let wif=base58.encode(from_hex(num+checksum));
+    return wif;
 }
+function pad(num, size) {
+    var s = num.toString(16);
+    while (s.length < size) s = "0" + s;
+    return s;
+}
+/*
+def getWif(privkey):
+    wif = b"\x80" + privkey
+    wif = b58(wif + sha256(sha256(wif))[:4])
+    return wif
+    */
 /*
 def getWif(privkey):
     wif = b"\x80" + privkey
